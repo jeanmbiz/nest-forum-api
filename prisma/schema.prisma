@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  INSTRUCTOR
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+
+  // alterar questions no plural - relacionamento com tabela Question
+  questions Question[]
+
+  // @map altera nome da tabela no DB
+  @@map("users")
+}
+
+model Question {
+  id        String    @id @default(uuid())
+  title     String
+  slug      String    @unique
+  content   String
+  // @map altera nome da coluna na tabela do DB
+  createdAt DateTime  @default(now()) @map("created_at")
+  // @updatedAt sempre que question for atualizada ele atualiza automatico
+  updatedAt DateTime? @updatedAt @map("updated_at")
+  authorId  String    @map("author_id")
+
+  // cria relacionamento com tabela User
+  author User @relation(fields: [authorId], references: [id])
+
+  @@map("questions")
+}
