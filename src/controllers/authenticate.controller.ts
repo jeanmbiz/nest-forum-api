@@ -13,13 +13,13 @@ import { PrismaService } from 'src/prisma/prisma.service'
 import { z } from 'zod'
 
 // cria Schema de validação com zod
-const AuthenticateBodySchema = z.object({
+const authenticateBodySchema = z.object({
   email: z.string().email(),
   password: z.string(),
 })
 
 // Criar tipagem para o Schema zod
-type AuthenticateBodySchema = z.infer<typeof AuthenticateBodySchema>
+type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>
 
 // /accounts é o prefixo das rotas
 @Controller('/sessions')
@@ -35,7 +35,7 @@ export class AuthenticateController {
   // retorno código de sucesso seja 201
   @HttpCode(201)
   // @UsePipes: utiliza ZodValidationPipe para validar dados do body pelo zod
-  @UsePipes(new ZodValidationPipe(AuthenticateBodySchema))
+  @UsePipes(new ZodValidationPipe(authenticateBodySchema))
   // @Body() da requisição e salvo na variavel body tipada pelo Zod
   async handle(@Body() body: AuthenticateBodySchema) {
     const { email, password } = body
