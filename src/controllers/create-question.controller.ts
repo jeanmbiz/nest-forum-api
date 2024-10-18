@@ -1,5 +1,4 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common'
-import { JwtService } from '@nestjs/jwt'
 import { CurrentUser } from 'src/auth/current-user-decorator'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { UserPayload } from 'src/auth/jwt.strategy'
@@ -25,7 +24,6 @@ export class CreateQuestionController {
   constructor(
     // inversão de dependência do prisma
     private prisma: PrismaService,
-    private jwt: JwtService,
   ) {}
 
   @Post()
@@ -45,7 +43,7 @@ export class CreateQuestionController {
         authorId: userId,
         title,
         content,
-        slug: 'asd',
+        slug: Math.random().toString(36).substring(2, 7),
       },
     })
   }
