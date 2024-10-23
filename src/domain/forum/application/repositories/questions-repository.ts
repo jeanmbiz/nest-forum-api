@@ -1,12 +1,13 @@
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { Question } from '../../enterprise/entities/question'
 
-export interface QuestionsRepository {
-  // método create que vai receber uma Anser(entidade) e vai retornar uma Promise de void
-  create(question: Question): Promise<void>
-  save(question: Question): Promise<void>
-  findById(questionId: string): Promise<Question | null>
-  findBySlug(slug: string): Promise<Question | null>
-  findManyRecent(params: PaginationParams): Promise<Question[]>
-  delete(question: Question): Promise<void>
+// nest: para fazer injeção de dependência, precisa ser classe abstrata ao invez de interface
+export abstract class QuestionsRepository {
+  // nest: adicionar abstract em cada método
+  abstract create(question: Question): Promise<void>
+  abstract save(question: Question): Promise<void>
+  abstract findById(questionId: string): Promise<Question | null>
+  abstract findBySlug(slug: string): Promise<Question | null>
+  abstract findManyRecent(params: PaginationParams): Promise<Question[]>
+  abstract delete(question: Question): Promise<void>
 }
