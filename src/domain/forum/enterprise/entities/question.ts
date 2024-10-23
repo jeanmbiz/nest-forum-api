@@ -8,14 +8,14 @@ import { QuestionBestAnswerChosenEvent } from '../events/question-best-answer-ch
 
 export interface QuestionProps {
   authorId: UniqueEntityID
-  bestAnswerId?: UniqueEntityID
+  bestAnswerId?: UniqueEntityID | null
   title: string
   content: string
   slug: Slug
   // para criar pergunta com anexo
   attachments: QuestionAttachmentList
   createdAt: Date
-  updatedAt?: Date
+  updatedAt?: Date | null
 }
 
 // Entidade Question terá Attachment(anexos) como agregado
@@ -82,15 +82,16 @@ export class Question extends AggregateRoot<QuestionProps> {
   }
 
   // utilizado para escolher melhor resposta e remover/alterar melhor resposta
-  set bestAnswerId(bestAnswerId: UniqueEntityID | undefined) {
+  set bestAnswerId(bestAnswerId: UniqueEntityID | undefined | null) {
     // se bestAnswerId for invalido, return
-    if (bestAnswerId === undefined) {
+    if (bestAnswerId === undefined || bestAnswerId === null) {
       return
     }
 
-    // se o id da melgor resposta for udentifned OU ele for diferente do recebido: dispara o evento
+    // se o id da melhor resposta for udentifned OU ele for diferente do recebido: dispara o evento
     if (
       this.props.bestAnswerId === undefined ||
+      this.props.bestAnswerId === null ||
       !bestAnswerId.equals(this.props.bestAnswerId)
     ) {
       // this é o tópico
