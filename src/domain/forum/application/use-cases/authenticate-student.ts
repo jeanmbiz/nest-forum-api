@@ -45,7 +45,7 @@ export class AuthenticateStudentUseCase {
     // comparo as senhas
     const isPasswordValid = await this.hashCompare.compare(
       password,
-      student.passowrd,
+      student.password,
     )
 
     if (!isPasswordValid) {
