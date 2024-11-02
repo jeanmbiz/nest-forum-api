@@ -1,8 +1,17 @@
-import { Controller, HttpCode, Post, UsePipes, Body } from '@nestjs/common'
+import {
+  Controller,
+  HttpCode,
+  Post,
+  UsePipes,
+  Body,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
 import { z } from 'zod'
 import { AuthenticateStudentUseCase } from '@/domain/forum/application/use-cases/authenticate-student'
+import { WrongCredentialsError } from '@/domain/forum/application/use-cases/errors/wrong-credentials-error'
 
 // cria Schema de validação com zod
 const authenticateBodySchema = z.object({
@@ -39,7 +48,14 @@ export class AuthenticateController {
     })
 
     if (result.isLeft()) {
-      throw new Error()
+      const error = result.value
+
+      switch (error.constructor) {
+        case WrongCredentialsError:
+          throw new UnauthorizedException(error.message)
+        default:
+          throw new BadRequestException(error.message)
+      }
     }
 
     // buscar access token dentro do resultado da execução do usecase
