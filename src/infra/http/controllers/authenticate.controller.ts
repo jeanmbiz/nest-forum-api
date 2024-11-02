@@ -1,16 +1,8 @@
-import {
-  Controller,
-  HttpCode,
-  Post,
-  UsePipes,
-  Body,
-  UnauthorizedException,
-} from '@nestjs/common'
+import { Controller, HttpCode, Post, UsePipes, Body } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { compare } from 'bcrypt'
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
-import { PrismaService } from '@/infra/database/prisma/prisma.service'
 import { z } from 'zod'
+import { AuthenticateStudentUseCase } from '@/domain/forum/application/use-cases/authenticate-student'
 
 // cria Schema de validação com zod
 const authenticateBodySchema = z.object({
@@ -27,7 +19,7 @@ export class AuthenticateController {
   // inversão de dependencia chamando o banco de dados
   constructor(
     // inversão de dependência do prisma
-    private prisma: PrismaService,
+    private authenticateStudentUseCase: AuthenticateStudentUseCase,
     private jwt: JwtService,
   ) {}
 
@@ -40,28 +32,18 @@ export class AuthenticateController {
   async handle(@Body() body: AuthenticateBodySchema) {
     const { email, password } = body
 
-    const user = await this.prisma.user.findUnique({
-      where: {
-        email,
-      },
+    // executar use case
+    const result = await this.authenticateStudentUseCase.execute({
+      email,
+      password,
     })
 
-    if (!user) {
-      // UnauthorizedException erro do Nest com msg e status code 401
-      throw new UnauthorizedException('User credentials do not match.')
+    if (result.isLeft()) {
+      throw new Error()
     }
 
-    const isPasswordValid = await compare(password, user.password)
-
-    if (!isPasswordValid) {
-      // UnauthorizedException erro do Nest com msg e status code 401
-      throw new UnauthorizedException('User credentials do not match.')
-    }
-
-    const accessToken = this.jwt.sign({
-      // payload do token
-      sub: user.id,
-    })
+    // buscar access token dentro do resultado da execução do usecase
+    const { accessToken } = result.value
 
     return { access_token: accessToken }
   }
