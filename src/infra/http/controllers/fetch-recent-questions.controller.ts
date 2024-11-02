@@ -3,6 +3,7 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common'
 import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard'
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
 import { z } from 'zod'
+import { HttpQuestionPresenter } from '../presenters/http-question-presenter'
 
 // cria Schema de validação com zod da paginaçãp
 const pageQueryParamsSchema = z
@@ -33,10 +34,17 @@ export class FetchRecentQuestionsController {
     // paginação recebido pela query (/questions?page=2)
     @Query('page', queryValidationPipe) page: PageQueryParamSchema,
   ) {
-    const questions = await this.fetchRecentQuestions.execute({
+    const result = await this.fetchRecentQuestions.execute({
       page,
     })
 
-    return { questions }
+    if (result.isLeft()) {
+      throw new Error()
+    }
+
+    const questions = result.value.questions
+
+    // utiliza o presenter pra retornar os dados ao usuário
+    return { questions: questions.map(HttpQuestionPresenter.toHTTP) }
   }
 }
