@@ -1,6 +1,7 @@
 import { Either, right } from '@/core/either'
 import { Question } from '../../enterprise/entities/question'
 import { QuestionsRepository } from '../repositories/questions-repository'
+import { Injectable } from '@nestjs/common'
 
 interface FetchRecentQuestionsUseCaseRequest {
   page: number
@@ -16,6 +17,8 @@ type FetchRecentQuestionsUseCaseResponse = Either<
   }
 >
 
+// Injectable(nest): para injetar caso de uso no controller do Nest.js
+@Injectable()
 export class FetchRecentQuestionsUseCase {
   // dependência do repositody - contrato/interface
   constructor(private questionsRepository: QuestionsRepository) {}
