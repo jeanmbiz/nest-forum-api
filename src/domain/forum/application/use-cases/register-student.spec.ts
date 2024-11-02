@@ -42,6 +42,6 @@ describe('Register Student', () => {
     // espero que seja sucesso
     expect(result.isRight()).toBe(true)
     // espero que a senha do student seja igual a hashedPassword
-    expect(inMemoryStudentsRepository.items[0].passowrd).toEqual(hashedPassword)
+    expect(inMemoryStudentsRepository.items[0].password).toEqual(hashedPassword)
   })
 })
