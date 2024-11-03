@@ -1,12 +1,5 @@
 import { FetchRecentQuestionsUseCase } from './../../../domain/forum/application/use-cases/fetch-recent-questions'
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-} from '@nestjs/common'
-import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard'
+import { BadRequestException, Controller, Get, Query } from '@nestjs/common'
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
 import { z } from 'zod'
 import { HttpQuestionPresenter } from '../presenters/http-question-presenter'
@@ -27,8 +20,6 @@ type PageQueryParamSchema = z.infer<typeof pageQueryParamsSchema>
 
 // /questions é o prefixo da rota
 @Controller('/questions')
-// UseGuards: protegendo rota com JwtAuthGuard
-@UseGuards(JwtAuthGuard)
 export class FetchRecentQuestionsController {
   constructor(
     // inversão de dependência

@@ -1,12 +1,5 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-} from '@nestjs/common'
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common'
 import { CurrentUser } from '@/infra/auth/current-user-decorator'
-import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard'
 import { UserPayload } from '@/infra/auth/jwt.strategy'
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
 import { z } from 'zod'
@@ -23,8 +16,6 @@ type CreateQuestionBodySchema = z.infer<typeof createQuestionBodySchema>
 
 // /questions é o prefixo das rotas
 @Controller('/questions')
-// UseGuards: protegendo rota com JwtAuthGuard
-@UseGuards(JwtAuthGuard)
 export class CreateQuestionController {
   // inversão de dependencia chamando o banco de dados
   constructor(
