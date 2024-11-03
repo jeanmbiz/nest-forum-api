@@ -12,6 +12,7 @@ import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
 import { z } from 'zod'
 import { AuthenticateStudentUseCase } from '@/domain/forum/application/use-cases/authenticate-student'
 import { WrongCredentialsError } from '@/domain/forum/application/use-cases/errors/wrong-credentials-error'
+import { Public } from '@/infra/auth/public'
 
 // cria Schema de validação com zod
 const authenticateBodySchema = z.object({
@@ -24,6 +25,7 @@ type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>
 
 // /accounts é o prefixo das rotas
 @Controller('/sessions')
+@Public()
 export class AuthenticateController {
   // inversão de dependencia chamando o banco de dados
   constructor(
