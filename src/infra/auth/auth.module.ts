@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { Env } from '@/infra/env/env'
 import { JwtStrategy } from './jwt.strategy'
+import { APP_GUARD } from '@nestjs/core'
+import { JwtAuthGuard } from './jwt-auth.guard'
 
 @Module({
   imports: [
@@ -24,6 +26,13 @@ import { JwtStrategy } from './jwt.strategy'
     }),
   ],
   // providers: recebe a proteção de rota com JWT
-  providers: [JwtStrategy],
+  providers: [
+    JwtStrategy,
+    {
+      // todas as rotas precisam de autenticação por padrão
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AuthModule {}
