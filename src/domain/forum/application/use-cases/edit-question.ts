@@ -7,6 +7,7 @@ import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
 import { QuestionAttachmentList } from '../../enterprise/entities/question-attachment-list'
 import { QuestionAttachment } from '../../enterprise/entities/question-attachment'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
+import { Injectable } from '@nestjs/common'
 
 interface EditQuestionUseCaseRequest {
   authorId: string
@@ -27,6 +28,7 @@ type EditQuestionUseCaseResponse = Either<
   }
 >
 
+@Injectable()
 export class EditQuestionUseCase {
   // dependência do repositody - contrato/interface
   constructor(
