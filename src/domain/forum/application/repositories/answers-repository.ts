@@ -1,14 +1,15 @@
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { Answer } from '../../enterprise/entities/answer'
 
-export interface AnswersRepository {
+export abstract class AnswersRepository {
   // método create que vai receber uma Anser(entidade) e vai retornar uma Promise de void
-  create(answer: Answer): Promise<void>
-  save(answer: Answer): Promise<void>
-  findById(answerId: string): Promise<Answer | null>
-  findManyByQuestionId(
+  abstract create(answer: Answer): Promise<void>
+  abstract save(answer: Answer): Promise<void>
+  abstract findById(answerId: string): Promise<Answer | null>
+  abstract findManyByQuestionId(
     questionId: string,
     params: PaginationParams,
   ): Promise<Answer[]>
-  delete(answer: Answer): Promise<void>
+
+  abstract delete(answer: Answer): Promise<void>
 }
