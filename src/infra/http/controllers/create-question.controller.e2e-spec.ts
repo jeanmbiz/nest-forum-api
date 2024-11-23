@@ -6,23 +6,26 @@ import { JwtService } from '@nestjs/jwt'
 import { DatabaseModule } from '@/infra/database/database.module'
 import { StudentFactory } from 'test/factories/make-student'
 import { PrismaService } from '@/infra/database/prisma/prisma.service'
+import { AttachmentFactory } from 'test/factories/make-attachment'
 
 describe('Create Question (E2E)', () => {
   let app: INestApplication
   let prisma: PrismaService
   let studentFactory: StudentFactory
+  let attachmentFactory: AttachmentFactory
   let jwt: JwtService
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [StudentFactory],
+      providers: [StudentFactory, AttachmentFactory],
     }).compile()
 
     app = moduleRef.createNestApplication()
 
     // injeção de dependência
     studentFactory = moduleRef.get(StudentFactory)
+    attachmentFactory = moduleRef.get(AttachmentFactory)
     prisma = moduleRef.get(PrismaService)
     jwt = moduleRef.get(JwtService)
 
@@ -36,6 +39,10 @@ describe('Create Question (E2E)', () => {
     // cria token do usuário passando user.id
     const accessToken = jwt.sign({ sub: user.id.toString() })
 
+    // criar e salva anexos da pergunta no DB
+    const attachment1 = await attachmentFactory.makePrismaAttachment()
+    const attachment2 = await attachmentFactory.makePrismaAttachment()
+
     // faz requisição para a rota
     const response = await request(app.getHttpServer())
       .post('/questions')
@@ -43,6 +50,7 @@ describe('Create Question (E2E)', () => {
       .send({
         title: 'New Question',
         content: 'Question content',
+        attachments: [attachment1.id.toString(), attachment2.id.toString()],
       })
 
     expect(response.statusCode).toBe(201)
@@ -55,5 +63,14 @@ describe('Create Question (E2E)', () => {
     })
 
     expect(questionOnDatabase).toBeTruthy()
+
+    // associar anexos criados anteriormente com pergunta criada
+    const attachmentsOnDatabase = await prisma.attachment.findMany({
+      where: {
+        questionId: questionOnDatabase?.id,
+      },
+    })
+
+    expect(attachmentsOnDatabase).toHaveLength(2)
   })
 })
