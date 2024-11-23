@@ -7,18 +7,20 @@ import { DatabaseModule } from '@/infra/database/database.module'
 import { StudentFactory } from 'test/factories/make-student'
 import { PrismaService } from '@/infra/database/prisma/prisma.service'
 import { QuestionFactory } from 'test/factories/make-question'
+import { AttachmentFactory } from 'test/factories/make-attachment'
 
 describe('Answer Question (E2E)', () => {
   let app: INestApplication
   let prisma: PrismaService
   let studentFactory: StudentFactory
   let questionFactory: QuestionFactory
+  let attachmentFactory: AttachmentFactory
   let jwt: JwtService
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [AppModule, DatabaseModule],
-      providers: [StudentFactory, QuestionFactory],
+      providers: [StudentFactory, QuestionFactory, AttachmentFactory],
     }).compile()
 
     app = moduleRef.createNestApplication()
@@ -26,6 +28,7 @@ describe('Answer Question (E2E)', () => {
     // injeção de dependência
     studentFactory = moduleRef.get(StudentFactory)
     questionFactory = moduleRef.get(QuestionFactory)
+    attachmentFactory = moduleRef.get(AttachmentFactory)
     prisma = moduleRef.get(PrismaService)
     jwt = moduleRef.get(JwtService)
 
@@ -47,12 +50,17 @@ describe('Answer Question (E2E)', () => {
     // pego id da pergunta criada
     const questionId = question.id.toString()
 
+    // criar e salva anexos da pergunta no DB
+    const attachment1 = await attachmentFactory.makePrismaAttachment()
+    const attachment2 = await attachmentFactory.makePrismaAttachment()
+
     // faz requisição para a rota
     const response = await request(app.getHttpServer())
       .post(`/questions/${questionId}/answers`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
         content: 'New answer',
+        attachments: [attachment1.id.toString(), attachment2.id.toString()],
       })
 
     // igual HttpCode do controller
@@ -66,5 +74,14 @@ describe('Answer Question (E2E)', () => {
     })
 
     expect(answerOnDatabase).toBeTruthy()
+
+    // associar anexos criados anteriormente com resposta criada
+    const attachmentsOnDatabase = await prisma.attachment.findMany({
+      where: {
+        answerId: answerOnDatabase?.id,
+      },
+    })
+
+    expect(attachmentsOnDatabase).toHaveLength(2)
   })
 })
