@@ -15,6 +15,11 @@ export class InMemoryQuestionsRepository implements QuestionsRepository {
   async create(question: Question) {
     this.items.push(question)
 
+    // salva anexo da pergunta
+    await this.questionAttachmentsRepository.createMany(
+      question.attachments.getItems(),
+    )
+
     // dispara o evento ao criar no DB
     DomainEvents.dispatchEventsForAggregate(question.id)
   }
@@ -23,6 +28,16 @@ export class InMemoryQuestionsRepository implements QuestionsRepository {
     const itemIndex = this.items.findIndex((item) => item.id === question.id)
 
     this.items[itemIndex] = question
+
+    // salva novos anexos da pergunta - usando watchedlist
+    await this.questionAttachmentsRepository.createMany(
+      question.attachments.getNewItems(),
+    )
+
+    // salva anexos removidos da pergunta - usando watchedlist
+    await this.questionAttachmentsRepository.deleteMany(
+      question.attachments.getRemovedItems(),
+    )
 
     // dispara o evento ao salvar/editar no DB
     DomainEvents.dispatchEventsForAggregate(question.id)
