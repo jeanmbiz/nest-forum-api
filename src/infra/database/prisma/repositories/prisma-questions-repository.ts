@@ -1,3 +1,4 @@
+import { QuestionAttachmentsRepository } from '@/domain/forum/application/repositories/question-attachments-repository'
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { QuestionsRepository } from '@/domain/forum/application/repositories/questions-repository'
 import { Question } from '@/domain/forum/enterprise/entities/question'
@@ -10,25 +11,43 @@ import { PrismaQuestionMapper } from '../mappers/prisma-question-mapper'
 // implementar Repositório(contrato) da camada de domínio
 export class PrismaQuestionsRepository implements QuestionsRepository {
   // injeta dependencia do Prisma
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private questionAttachmentsRepository: QuestionAttachmentsRepository,
+  ) {}
 
   async create(question: Question): Promise<void> {
     const data = PrismaQuestionMapper.toPrisma(question)
 
+    // cria a question no DB
     await this.prisma.question.create({
       data,
     })
+
+    // cria anexos da pergunta no DB - usando id da pergunta criada
+    await this.questionAttachmentsRepository.createMany(
+      question.attachments.getItems(),
+    )
   }
 
   async save(question: Question): Promise<void> {
     const data = PrismaQuestionMapper.toPrisma(question)
 
-    await this.prisma.question.update({
-      where: {
-        id: data.id,
-      },
-      data,
-    })
+    // Promise.all: ganho de performance, pois uma requisição nao depende da outra, todas podem ser executadas juntas
+    await Promise.all([
+      this.prisma.question.update({
+        where: {
+          id: question.id.toString(),
+        },
+        data,
+      }),
+      this.questionAttachmentsRepository.createMany(
+        question.attachments.getNewItems(),
+      ),
+      this.questionAttachmentsRepository.deleteMany(
+        question.attachments.getRemovedItems(),
+      ),
+    ])
   }
 
   async findById(questionId: string): Promise<Question | null> {
