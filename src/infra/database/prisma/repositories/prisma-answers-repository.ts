@@ -48,20 +48,36 @@ export class PrismaAnswersRepository implements AnswersRepository {
   async create(answer: Answer): Promise<void> {
     const data = PrismaAnswerMapper.toPrisma(answer)
 
+    // cria a answer no DB
     await this.prisma.answer.create({
       data,
     })
+
+    // cria anexos da resposta no DB - usando id da resposta criada
+    await this.answerAttachmentsRepository.createMany(
+      answer.attachments.getItems(),
+    )
   }
 
   async save(answer: Answer): Promise<void> {
     const data = PrismaAnswerMapper.toPrisma(answer)
 
-    await this.prisma.answer.update({
-      where: {
-        id: data.id,
-      },
-      data,
-    })
+    // Promise.all: ganho de performance, pois uma requisição nao depende da outra, todas podem ser executadas juntas
+    Promise.all([
+      this.prisma.answer.update({
+        where: {
+          id: data.id,
+        },
+        data,
+      }),
+
+      this.answerAttachmentsRepository.createMany(
+        answer.attachments.getNewItems(),
+      ),
+      this.answerAttachmentsRepository.deleteMany(
+        answer.attachments.getRemovedItems(),
+      ),
+    ])
   }
 
   async delete(answer: Answer): Promise<void> {
