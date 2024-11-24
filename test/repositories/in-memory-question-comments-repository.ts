@@ -1,11 +1,16 @@
 import { PaginationParams } from '@/core/repositories/pagination-params'
 import { QuestionCommentsRepository } from '@/domain/forum/application/repositories/question-comments-repository'
 import { QuestionComment } from '@/domain/forum/enterprise/entities/question-comment'
+import { InMemoryStudentsRepository } from './in-memory-students-repository'
+import { CommentWithAuthor } from '@/domain/forum/enterprise/entities/value-objects/comment-with-author'
 
 export class InMemoryQuestionCommentsRepository
   implements QuestionCommentsRepository
 {
   public items: QuestionComment[] = []
+
+  // injeão de dependencia: para buscar autor do comentário
+  constructor(private inMemoryStudentsRepository: InMemoryStudentsRepository) {}
 
   async create(questionComment: QuestionComment) {
     this.items.push(questionComment)
@@ -25,6 +30,37 @@ export class InMemoryQuestionCommentsRepository
     const questionComment = this.items
       .filter((item) => item.questionId.toString() === questionId)
       .slice((page - 1) * 20, page * 20)
+
+    return questionComment
+  }
+
+  async findManyByQuestionIdWithAuthor(
+    questionId: string,
+    { page }: PaginationParams,
+  ) {
+    const questionComment = this.items
+      .filter((item) => item.questionId.toString() === questionId)
+      .slice((page - 1) * 20, page * 20)
+      .map((comment) => {
+        const author = this.inMemoryStudentsRepository.items.find((student) =>
+          student.id.equals(comment.authorId),
+        )
+
+        if (!author) {
+          throw new Error(
+            `Author with ID ${comment.authorId.toString()} doesn't exist.`,
+          )
+        }
+
+        return CommentWithAuthor.create({
+          commentId: comment.id,
+          content: comment.content,
+          createdAt: comment.createdAt,
+          updatedAt: comment.updatedAt,
+          authorId: comment.authorId,
+          author: author.name,
+        })
+      })
 
     return questionComment
   }
