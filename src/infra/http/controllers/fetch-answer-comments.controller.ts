@@ -1,4 +1,3 @@
-import { HttpCommentPresenter } from '../presenters/http-comment-presenter'
 import {
   BadRequestException,
   Controller,
@@ -9,6 +8,7 @@ import {
 import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe'
 import { z } from 'zod'
 import { FetchAnswerCommentsUseCase } from '@/domain/forum/application/use-cases/fetch-answer-comments'
+import { CommentWithAuthorPresenter } from '../presenters/comment-with-author-presenter'
 
 // cria Schema de validação com zod da paginaçãp
 const pageQueryParamsSchema = z
@@ -48,9 +48,9 @@ export class FetchAnswerCommentsController {
       throw new BadRequestException()
     }
 
-    const answerComments = result.value.answerComments
+    const comments = result.value.comments
 
     // utiliza o presenter pra retornar os dados ao usuário
-    return { comments: answerComments.map(HttpCommentPresenter.toHTTP) }
+    return { comments: comments.map(CommentWithAuthorPresenter.toHTTP) }
   }
 }
