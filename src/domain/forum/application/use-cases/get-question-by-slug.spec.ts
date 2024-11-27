@@ -1,40 +1,74 @@
-import { InMemoryQuestionAttachmentsRepository } from 'test/repositories/in-memory-question-attachments-repository'
-import { InMemoryQuestionsRepository } from '../../../../../test/repositories/in-memory-questions-repository'
-import { Slug } from '../../enterprise/entities/value-objects/slug'
 import { GetQuestionBySlugUseCase } from './get-question-by-slug'
+import { InMemoryQuestionsRepository } from 'test/repositories/in-memory-questions-repository'
+import { Slug } from '@/domain/forum/enterprise/entities/value-objects/slug'
 import { makeQuestion } from 'test/factories/make-question'
+import { InMemoryQuestionAttachmentsRepository } from 'test/repositories/in-memory-question-attachments-repository'
+import { InMemoryAttachmentsRepository } from 'test/repositories/in-memory-attachments-repository'
+import { InMemoryStudentsRepository } from 'test/repositories/in-memory-students-repository'
+import { makeStudent } from 'test/factories/make-student'
+import { makeAttachment } from 'test/factories/make-attachment'
+import { makeQuestionAttachment } from 'test/factories/make-question-attachments'
 
 let inMemoryQuestionAttachmentsRepository: InMemoryQuestionAttachmentsRepository
+let inMemoryAttachmentsRepository: InMemoryAttachmentsRepository
+let inMemoryStudentsRepository: InMemoryStudentsRepository
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository
-// sut = system under test
 let sut: GetQuestionBySlugUseCase
 
 describe('Get Question By Slug', () => {
   beforeEach(() => {
-    // automatiza a criação do DB em memória e use case
     inMemoryQuestionAttachmentsRepository =
       new InMemoryQuestionAttachmentsRepository()
+
+    inMemoryAttachmentsRepository = new InMemoryAttachmentsRepository()
+    inMemoryStudentsRepository = new InMemoryStudentsRepository()
+
     inMemoryQuestionsRepository = new InMemoryQuestionsRepository(
       inMemoryQuestionAttachmentsRepository,
+      inMemoryAttachmentsRepository,
+      inMemoryStudentsRepository,
     )
     sut = new GetQuestionBySlugUseCase(inMemoryQuestionsRepository)
   })
+
   it('should be able to get a question by slug', async () => {
-    // criar pergunta c/ slug pelo Factory
+    const student = makeStudent({ name: 'John Doe' })
+
+    await inMemoryStudentsRepository.create(student)
+
     const newQuestion = makeQuestion({
-      slug: Slug.create('example-slug'),
+      authorId: student.id,
+      slug: Slug.create('example-question'),
     })
 
-    // salvo pergunta no repositório
     await inMemoryQuestionsRepository.create(newQuestion)
 
+    const attachment = makeAttachment({
+      title: 'Some attachment',
+    })
+
+    inMemoryAttachmentsRepository.items.push(attachment)
+
+    inMemoryQuestionAttachmentsRepository.items.push(
+      makeQuestionAttachment({
+        attachmentId: attachment.id,
+        questionId: newQuestion.id,
+      }),
+    )
+
     const result = await sut.execute({
-      slug: 'example-slug',
+      slug: 'example-question',
     })
 
     expect(result.value).toMatchObject({
       question: expect.objectContaining({
         title: newQuestion.title,
+        author: 'John Doe',
+        attachments: [
+          expect.objectContaining({
+            title: attachment.title,
+          }),
+        ],
       }),
     })
   })
