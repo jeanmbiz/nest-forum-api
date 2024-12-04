@@ -10,6 +10,9 @@ export class DomainEvents {
   // markedAggregates: marca quais agragados da aplicação tem eventos pendentes (ready = false)
   private static markedAggregates: AggregateRoot<unknown>[] = []
 
+  // para rodar os disparos de eventos
+  public static shouldRun = true
+
   public static markAggregateForDispatch(aggregate: AggregateRoot<unknown>) {
     const aggregateFound = !!this.findMarkedAggregateByID(aggregate.id)
 
@@ -72,6 +75,11 @@ export class DomainEvents {
     const eventClassName: string = event.constructor.name
 
     const isEventRegistered = eventClassName in this.handlersMap
+
+    // testes de eventos
+    if (!this.shouldRun) {
+      return
+    }
 
     if (isEventRegistered) {
       const handlers = this.handlersMap[eventClassName]
