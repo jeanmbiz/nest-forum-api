@@ -3,51 +3,43 @@ import { Notification } from '../../enterprise/entities/notification'
 import { NotificationsRepository } from '../repositories/notifications-repository'
 import { ResourceNotFoundError } from '@/core/errors/errors/resource-not-found-error'
 import { NotAllowedError } from '@/core/errors/errors/not-allowed-error'
+import { Injectable } from '@nestjs/common'
 
 interface ReadNotificationUseCaseRequest {
   recipientId: string
   notificationId: string
 }
 
-// type Either: retorna ou sucesso ou erro
 type ReadNotificationUseCaseResponse = Either<
-  // caso de erro
   ResourceNotFoundError | NotAllowedError,
-  // caso de sucesso
   {
     notification: Notification
   }
 >
 
+@Injectable()
 export class ReadNotificationUseCase {
-  // dependência do repositody - contrato/interface
   constructor(private notificationsRepository: NotificationsRepository) {}
 
   async execute({
     recipientId,
     notificationId,
   }: ReadNotificationUseCaseRequest): Promise<ReadNotificationUseCaseResponse> {
-    // busca a notificação
     const notification =
       await this.notificationsRepository.findById(notificationId)
 
-    if (!recipientId) {
-      // left = retorno de erro
+    if (!notification) {
       return left(new ResourceNotFoundError())
     }
 
-    if (recipientId !== notification?.recipientId.toString()) {
-      // left = retorno de erro
+    if (recipientId !== notification.recipientId.toString()) {
       return left(new NotAllowedError())
     }
 
-    // marco notificação como lida
     notification.read()
 
-    // crio notificação dentro do repositorio
-    await this.notificationsRepository.create(notification)
+    await this.notificationsRepository.save(notification)
 
-    // right = retorno sucesso
     return right({ notification })
   }
 }
