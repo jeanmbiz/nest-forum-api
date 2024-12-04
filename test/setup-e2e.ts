@@ -3,7 +3,7 @@ import { config } from 'dotenv'
 import { PrismaClient } from '@prisma/client'
 import { randomUUID } from 'node:crypto'
 import { execSync } from 'node:child_process'
-// import { DomainEvents } from '@/core/events/domain-events'
+import { DomainEvents } from '@/core/events/domain-events'
 // import { Redis } from 'ioredis'
 // import { envSchema } from '@/infra/env/env'
 
@@ -31,7 +31,8 @@ beforeAll(async () => {
 
   process.env.DATABASE_URL = databaseURL
 
-  // DomainEvents.shouldRun = false
+  // configuração de eventos
+  DomainEvents.shouldRun = false
 
   // await redis.flushdb()
 
