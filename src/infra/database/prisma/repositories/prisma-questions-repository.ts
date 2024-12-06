@@ -17,7 +17,7 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
   // injeta dependencia do Prisma
   constructor(
     private prisma: PrismaService,
-    private cacheRepository: CacheRepository
+    private cacheRepository: CacheRepository,
     private questionAttachmentsRepository: QuestionAttachmentsRepository,
   ) {}
 
@@ -56,7 +56,7 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
         question.attachments.getRemovedItems(),
       ),
       // deletar cache sempre que uma nova informaçãp for salva
-      this.cacheRepository.delete(`question:${data.slug}:details`)
+      this.cacheRepository.delete(`question:${data.slug}:details`),
     ])
 
     // disparar eventos
@@ -99,12 +99,11 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
     const cacheHit = await this.cacheRepository.get(`question:${slug}:details`)
 
     // se houver cache, retorna os dados pro usuário sem bater no banco de dados pŕisma
-    if(cacheHit){
+    if (cacheHit) {
       const cachedData = JSON.parse(cacheHit)
 
       return cachedData
     }
-
 
     const question = await this.prisma.question.findUnique({
       where: {
@@ -124,7 +123,10 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
     const questionDetails = PrismaQuestionDetailsMapper.toDomain(question)
 
     // salvar os dados em cache
-    await this.cacheRepository.set(`question:${slug}:details`, JSON.stringify(questionDetails))
+    await this.cacheRepository.set(
+      `question:${slug}:details`,
+      JSON.stringify(questionDetails),
+    )
 
     return questionDetails
   }
