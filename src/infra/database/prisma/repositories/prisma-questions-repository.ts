@@ -8,6 +8,7 @@ import { PrismaQuestionMapper } from '../mappers/prisma-question-mapper'
 import { QuestionDetails } from '@/domain/forum/enterprise/entities/value-objects/question-details'
 import { PrismaQuestionDetailsMapper } from '../mappers/prisma-question-details-mapper'
 import { DomainEvents } from '@/core/events/domain-events'
+import { CacheRepository } from '@/infra/cache/cache-repository'
 
 // Injectable: Este repositório será injetado nos casos de uso
 @Injectable()
@@ -16,6 +17,7 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
   // injeta dependencia do Prisma
   constructor(
     private prisma: PrismaService,
+    private cacheRepository: CacheRepository
     private questionAttachmentsRepository: QuestionAttachmentsRepository,
   ) {}
 
@@ -53,6 +55,8 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
       this.questionAttachmentsRepository.deleteMany(
         question.attachments.getRemovedItems(),
       ),
+      // deletar cache sempre que uma nova informaçãp for salva
+      this.cacheRepository.delete(`question:${data.slug}:details`)
     ])
 
     // disparar eventos
@@ -91,6 +95,17 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
 
   // método p/ retornar os dados da pergunta c/ autor e anexos.
   async findDetailsBySlug(slug: string): Promise<QuestionDetails | null> {
+    // busca informação no cache
+    const cacheHit = await this.cacheRepository.get(`question:${slug}:details`)
+
+    // se houver cache, retorna os dados pro usuário sem bater no banco de dados pŕisma
+    if(cacheHit){
+      const cachedData = JSON.parse(cacheHit)
+
+      return cachedData
+    }
+
+
     const question = await this.prisma.question.findUnique({
       where: {
         slug,
@@ -106,7 +121,12 @@ export class PrismaQuestionsRepository implements QuestionsRepository {
       return null
     }
 
-    return PrismaQuestionDetailsMapper.toDomain(question)
+    const questionDetails = PrismaQuestionDetailsMapper.toDomain(question)
+
+    // salvar os dados em cache
+    await this.cacheRepository.set(`question:${slug}:details`, JSON.stringify(questionDetails))
+
+    return questionDetails
   }
 
   async findManyRecent({ page }: PaginationParams): Promise<Question[]> {
