@@ -10,9 +10,7 @@
  <a href="#license">Licensa</a> • 
 </p>
 
-<p align="center">
-    <b>Este projeto é uma API de fórum que permite aos usuários criar, editar e deletar perguntas e respostas, além de comentar em perguntas e respostas, adicionar anexos e também escolher a melhor resposta de uma pergunta. A aplicação também possui um sistema de notificações para alertar os usuários sobre atividades relevantes.</b>
-</p>
+<p align="center"> <b>Este projeto é uma API de fórum moderna e eficiente, desenvolvida com tecnologias como <em>NestJS</em>, <em>Prisma</em>, e <em>PostgreSQL</em>, projetada para oferecer uma experiência completa de gerenciamento de conteúdo. Com funcionalidades robustas, permite aos usuários criar, editar e deletar perguntas e respostas, escolher a melhor resposta para uma pergunta, adicionar e gerenciar anexos com validações avançadas, além de interagir por meio de comentários. O sistema também inclui notificações em tempo real, autenticação segura com JWT, controle de permissões detalhado (RBAC) e integração com armazenamento na nuvem via AWS S3, garantindo escalabilidade e segurança.</b> </p>
 
 <h2 id="tech">🛠️ Tecnologias</h2>
 
@@ -25,14 +23,14 @@
 - 📏 **ZOD**
 - ☁️ **AWS S3**
 - 🧪 **Vitest**
-- E muito mais...
+- 🚀 **E muito mais!**
 
 <h2 id="arch">📐 Arquitetura e Design de Software</h2>
 
 - Clean Architecture
 - Domain-driven Design (DDD)
 - SOLID
-- Design Patterns: Repository Pattern, Factory Pattern.
+- Design Patterns: Repository Pattern e Factory Pattern.
   
 <h2 id="diagram">📊 Diagrama do Projeto</h2>
 
@@ -111,4 +109,4 @@
   
 <h2 id="license">📃 Licença</h2>
 
-Este projeto está sob a licença [MIT](/LICENSE) license
+Este projeto está sob a licença [MIT](/src/utils/LICENSE) license
