@@ -40,11 +40,11 @@
 
 <h2 id="tests">🧪 Testes Unitários </h2>
 
-![testesUnitários](/src/utils/testes-unitarios.png)
+![testesUnitários](/src/utils/unit-tests.png)
 
 <h2 id="">🧪 Testes E2E </h2>
 
-![testese2e](/src/utils/testes-2e2.png)
+![testese2e](/src/utils/2e2-tests.png)
 
 <h2 id="config">⚙️ Configuração do Ambiente</h2>
 
