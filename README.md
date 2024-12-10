@@ -4,6 +4,7 @@
  <a href="#tech">Tecnologias</a> • 
  <a href="#arch">Arquitetura</a> • 
  <a href="#diagram">Diagrama</a> • 
+  <a href="#tests">Testes</a> • 
  <a href="#config">Configuração</a> • 
  <a href="#functions">Funcionalidades</a> • 
  <a href="#license">Licensa</a> • 
@@ -36,6 +37,14 @@
 <h2 id="diagram">📊 Diagrama do Projeto</h2>
 
 ![diagrama](/src/utils/diagram.jpg)
+
+<h2 id="tests">🧪 Testes Unitários </h2>
+
+![testesUnitários](/src/utils/testes-unitarios.png)
+
+<h2 id="">🧪 Testes E2E </h2>
+
+![testese2e](/src/utils/testes-2e2.png)
 
 <h2 id="config">⚙️ Configuração do Ambiente</h2>
 
